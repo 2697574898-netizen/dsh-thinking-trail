@@ -3,7 +3,7 @@
  * 并用 dsh 真实的 JSON Schema 校验器核对工具 schema。
  * 用法：node test/smoke.mjs
  */
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import assert from 'node:assert/strict';
@@ -27,9 +27,13 @@ apply(ctx, { dir });
 assert.equal(sections.length, 1);
 assert.ok(Number.isFinite(sections[0].order));
 assert.match(sections[0].text, /路线/);
+assert.match(sections[0].text, /#关键词/);
 
 // 2. 工具 schema 过 dsh 的校验器
-assert.deepEqual([...tools.keys()].sort(), ['recall_thoughts', 'record_thought']);
+assert.deepEqual(
+	[...tools.keys()].sort(),
+	['append_task_log', 'link_material', 'list_material', 'open_task_log', 'recall_thoughts', 'record_thought']
+);
 for (const def of tools.values()) {
 	assertSupportedJsonSchema(def.parameters);
 	assertSupportedJsonSchema(def.output.schema);
@@ -48,12 +52,35 @@ assert.equal(recorded.ok, true);
 const hit = await tools.get('recall_thoughts').execute({ query: '插件' });
 assert.equal(hit.scanned, 1);
 assert.equal(hit.matches[0].goal, '给 DSH 做思考路径插件');
+assert.equal((await tools.get('recall_thoughts').execute({ query: '完全不存在的词' })).matches.length, 0);
+assert.equal((await tools.get('recall_thoughts').execute({})).matches.length, 1);
 
-const miss = await tools.get('recall_thoughts').execute({ query: '完全不存在的词' });
-assert.equal(miss.matches.length, 0);
+// 4. 任务日志
+const opened = await tools.get('open_task_log').execute({ title: '测试任务', kind: '自测' });
+assert.equal(opened.ok, true);
+const log = opened.path;
+assert.match(readFileSync(log, 'utf8'), /## 不足/);
 
-const recent = await tools.get('recall_thoughts').execute({});
-assert.equal(recent.matches.length, 1);
+await tools.get('append_task_log').execute({ path: log, section: 'path', text: '写 schema → 跑 smoke' });
+await tools.get('append_task_log').execute({ path: log, section: 'gap', text: '一开始忘了去重' });
+const body = readFileSync(log, 'utf8');
+assert.match(body, /写 schema → 跑 smoke/);
+assert.match(body, /一开始忘了去重/);
+// 追加内容必须落在对应小节里，不能串到别的小节
+assert.ok(body.indexOf('一开始忘了去重') < body.indexOf('## 进步'));
+
+// 5. 素材调度去重
+const linked = await tools.get('link_material').execute({ path: log, session_id: 's1', seq: '12', summary: '插件 API 结论' });
+assert.match(linked.text, /已登记/);
+const again = await tools.get('link_material').execute({ path: log, session_id: 's1', seq: '12', summary: '重复搬运' });
+assert.match(again.text, /跳过/);
+await tools.get('link_material').execute({ path: log, session_id: 's2', seq: '3', summary: '第二条' });
+const list = await tools.get('list_material').execute({ path: log });
+assert.equal(JSON.parse(list.text).length, 2);
+
+// 6. 不存在的日志路径要给明确失败
+const missing = await tools.get('append_task_log').execute({ path: join(dir, 'nope.md'), section: 'path', text: 'x' });
+assert.equal(missing.ok, false);
 
 rmSync(dir, { recursive: true, force: true });
 console.log('smoke ok');
