@@ -1,0 +1,29 @@
+{
+  "name": "dsh-thinking-trail",
+  "version": "0.1.0",
+  "description": "思考路径留存与复用：跨会话记录 AI 的路线、决策和教训，下次同类任务先查桥。",
+  "type": "module",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml"
+  ],
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "cordis",
+    "memory",
+    "thinking"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

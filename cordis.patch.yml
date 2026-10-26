@@ -1,0 +1,5 @@
+# 把 thinking-trail 挂进 DSH 配置树。
+# insert 的 id 与包名一致，避免和别的插件的行标识冲突。
+- insert:
+    - id: dsh-thinking-trail
+      name: 'dsh-thinking-trail'
