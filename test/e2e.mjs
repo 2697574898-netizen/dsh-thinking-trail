@@ -10,9 +10,22 @@ import { apply } from '../lib/index.js';
 
 function boot(config) {
 	const dir = mkdtempSync(join(tmpdir(), 'trail-e2e-'));
-	const tools = new Map();
+	const raw = new Map();
 	const sections = [];
-	apply({ systemPrompt: { section: (s) => sections.push(s) }, tools: { register: (d) => tools.set(d.name, d) } }, { dir, ...config });
+	apply({ systemPrompt: { section: (s) => sections.push(s) }, tools: { register: (d) => raw.set(d.name, d) } }, { dir, ...config });
+	// 包一层：每次调用都按 output.schema.required 校验返回值，防止「schema 要 path 但没返回」
+	const tools = new Map();
+	for (const [name, def] of raw) {
+		tools.set(name, {
+			...def,
+			execute: async (args) => {
+				const value = await def.execute(args);
+				for (const key of def.output.schema.required ?? []) assert.ok(key in value, `${name} 返回值缺必填字段 ${key}`);
+				for (const key of Object.keys(value)) assert.ok(key in def.output.schema.properties, `${name} 返回了 schema 未声明的字段 ${key}`);
+				return value;
+			}
+		});
+	}
 	return { dir, tools, section: sections[0], cleanup: () => rmSync(dir, { recursive: true, force: true }) };
 }
 
