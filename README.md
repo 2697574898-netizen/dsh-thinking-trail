@@ -36,18 +36,14 @@ ln -sfn /path/to/dsh-thinking-trail ~/.dsh/profiles/desktop/node_modules/dsh-thi
     maxResults: 5                  # recall 默认返回条数
 ```
 
-## 热重载（改代码免重启）
+## 改完代码怎么生效
 
-DSH 的 `hmr` 默认只监听 profile 配置文件，**不监听模块代码**。要用「边用边改」，在 profile 的 `cordis.patch.yml` 加：
+**必须重启应用**。实测当前版本 dsh 的 `hmr` 只热载 profile 配置（`cordis.patch.yml`），对模块代码无效：
+- `root: ["node_modules/..."]` 相对路径会解析到 dsh-hmr 包自己的目录（`baseDir` 取的是 `ctx.baseUrl`），因此永远 watch 不到；
+- 换成绝对路径、或开 `ignored: []`，目录虽然对上，但 `profileModules()` 只认能被 Loader 匹配的 `file:` 模块，改文件后不触发 reload；
+- 用 `disabled: true/false` 强制重建也不生效。
 
-```yaml
-- id: hmr
-  config:
-    root: ["node_modules/dsh-thinking-trail"]   # 只看这个插件目录
-    ignored: []                                  # 别把 node_modules 整体忽略掉
-```
-
-改完 `lib/index.js` 保存即热重载；配置本身也是热载的。
+所以流程是：改 `lib/index.js` → `node test/smoke.mjs` → 退出应用重开。重启后 `~/.dsh/thinking-trails/state.json` 会盖新的 `appliedAt`，可用来确认加载成功；加载失败会写 `apply-error.txt`。
 
 ## 配置文件位置
 
