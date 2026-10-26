@@ -5,7 +5,7 @@
 - 跨会话：路径存在 `~/.dsh/thinking-trails/*.jsonl`，不同对话共享同一份。
 - 人可读：纯 JSONL 明文，可以直接 grep / 打开看 / 提交到仓库。
 - 零依赖：只用 Node 标准库，不 import 任何 `@deepseek-ai/*` 内部包，方便单独复制、开源、改造。
-- 六个工具，三件事：
+- 七个工具，四件事：
   - **思考路径**：`record_thought` 任务收尾写一条（`goal`、`route` 必填，`decisions`/`lessons`/`tags` 可选）；`recall_thoughts` 按关键词检索，不带关键词返回最近几条。
   - **任务日志**：`open_task_log` 建一份按任务的 md（路径 / 经验 / 不足 / 进步 / 思考路径）；`append_task_log` 往对应小节追加，建好会把**完整路径告诉你**。每次任务开始前 AI 会先问你要不要记。`record_thought` 收尾时也会顺手把路径写进当前日志。
   - **能力核对**：`check_capability` 列出「这次任务需要的能力 → 本机有没有」：扫已装 skill（`~/.dsh/skills`）和已装插件（profile `bundles`），缺的会明说。
@@ -35,6 +35,7 @@ ln -sfn /path/to/dsh-thinking-trail ~/.dsh/profiles/desktop/node_modules/dsh-thi
   config:
     dir: /Users/you/notes/trails   # 默认 <DSH_HOME>/thinking-trails
     maxResults: 5                  # recall 默认返回条数
+    askLog: true                   # 每次任务前问要不要记日志；false = 只在你说「记日志」时建
 ```
 
 ## 改完代码怎么生效
