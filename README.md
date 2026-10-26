@@ -7,7 +7,8 @@
 - 零依赖：只用 Node 标准库，不 import 任何 `@deepseek-ai/*` 内部包，方便单独复制、开源、改造。
 - 六个工具，三件事：
   - **思考路径**：`record_thought` 任务收尾写一条（`goal`、`route` 必填，`decisions`/`lessons`/`tags` 可选）；`recall_thoughts` 按关键词检索，不带关键词返回最近几条。
-  - **任务日志**：`open_task_log` 建一份按任务的 md（路径 / 经验 / 不足 / 进步）；`append_task_log` 往对应小节追加。每次任务开始前 AI 会先问你要不要记。
+  - **任务日志**：`open_task_log` 建一份按任务的 md（路径 / 经验 / 不足 / 进步 / 思考路径）；`append_task_log` 往对应小节追加，建好会把**完整路径告诉你**。每次任务开始前 AI 会先问你要不要记。`record_thought` 收尾时也会顺手把路径写进当前日志。
+  - **能力核对**：`check_capability` 列出「这次任务需要的能力 → 本机有没有」：扫已装 skill（`~/.dsh/skills`）和已装插件（profile `bundles`），缺的会明说。
   - **会话素材调度**：`link_material` 把从别的会话调来的内容登记进日志表格，**同 session_id + seq 自动判重**；`list_material` 列出已登记的，避免重复搬运。
 - 一条系统提示（order 150）：用用户的语言思考；非简单任务先给路线再执行；开工前先查旧路；收尾存一条；`#关键词` 表示从旧会话调素材，先检索、由用户挑、只读确认过的、每读一条就登记去重。
 
@@ -49,6 +50,7 @@ ln -sfn /path/to/dsh-thinking-trail ~/.dsh/profiles/desktop/node_modules/dsh-thi
 
 - 路径库：`<DSH_HOME>/thinking-trails/trails.jsonl`（2 MB 自动轮转）
 - 任务日志：`<DSH_HOME>/thinking-trails/logs/YYYY-MM-DD-<标题>.md`
+- 当前日志指针：`<DSH_HOME>/thinking-trails/current-log.json`（`record_thought` 靠它找日志）
 - DSH_HOME 默认 `~/.dsh`；可用上面的 `dir` 配置整体挪走。
 
 ## 自测

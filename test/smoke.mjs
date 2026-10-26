@@ -32,7 +32,7 @@ assert.match(sections[0].text, /#关键词/);
 // 2. 工具 schema 过 dsh 的校验器
 assert.deepEqual(
 	[...tools.keys()].sort(),
-	['append_task_log', 'link_material', 'list_material', 'open_task_log', 'recall_thoughts', 'record_thought']
+	['append_task_log', 'check_capability', 'link_material', 'list_material', 'open_task_log', 'recall_thoughts', 'record_thought']
 );
 for (const def of tools.values()) {
 	assertSupportedJsonSchema(def.parameters);
@@ -60,6 +60,7 @@ const opened = await tools.get('open_task_log').execute({ title: '测试任务',
 assert.equal(opened.ok, true);
 const log = opened.path;
 assert.match(readFileSync(log, 'utf8'), /## 不足/);
+assert.match(readFileSync(log, 'utf8'), /## 思考路径/);
 
 await tools.get('append_task_log').execute({ path: log, section: 'path', text: '写 schema → 跑 smoke' });
 await tools.get('append_task_log').execute({ path: log, section: 'gap', text: '一开始忘了去重' });
@@ -68,6 +69,10 @@ assert.match(body, /写 schema → 跑 smoke/);
 assert.match(body, /一开始忘了去重/);
 // 追加内容必须落在对应小节里，不能串到别的小节
 assert.ok(body.indexOf('一开始忘了去重') < body.indexOf('## 进步'));
+
+// 4b. record_thought 同时写进当前任务日志
+await tools.get('record_thought').execute({ goal: '第二条路径', route: '验证写日志' });
+assert.match(readFileSync(log, 'utf8'), /## 思考路径[\s\S]*第二条路径/);
 
 // 5. 素材调度去重
 const linked = await tools.get('link_material').execute({ path: log, session_id: 's1', seq: '12', summary: '插件 API 结论' });
@@ -81,6 +86,11 @@ assert.equal(JSON.parse(list.text).length, 2);
 // 6. 不存在的日志路径要给明确失败
 const missing = await tools.get('append_task_log').execute({ path: join(dir, 'nope.md'), section: 'path', text: 'x' });
 assert.equal(missing.ok, false);
+
+// 7. 能力核对：本机装了 ponytail skill，假词应报缺
+const cap = await tools.get('check_capability').execute({ needs: ['ponytail', 'zzz不存在zzz'] });
+assert.match(cap.text, /✅ ponytail/);
+assert.match(cap.text, /❌ zzz不存在zzz/);
 
 rmSync(dir, { recursive: true, force: true });
 console.log('smoke ok');
