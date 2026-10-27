@@ -1,5 +1,7 @@
 # dsh-thinking-trail
 
+[![test](https://github.com/2697574898-netizen/dsh-thinking-trail/actions/workflows/test.yml/badge.svg)](https://github.com/2697574898-netizen/dsh-thinking-trail/actions/workflows/test.yml)
+
 > **English**: A plugin for [DeepSeek Harness](https://github.com/deepseek-ai) that keeps an AI's task trails (goal → route → decisions → lessons) in local JSONL, so the next similar task starts from a bridge instead of from scratch. Zero dependencies, MIT.
 
 给 DeepSeek Harness 用的「思考路径」插件：AI 把每个任务的**目标 → 路线 → 决策 → 教训**留在本地，下次遇到同类任务先查旧路，而不是从零找路。
