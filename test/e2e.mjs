@@ -31,13 +31,13 @@ function boot(config) {
 
 // 1. 默认：每次任务前问日志
 const a = boot({});
-assert.match(a.section.text, /先问一句/);
+assert.match(a.section.text, /这次记日志吗/);
 assert.equal(a.tools.size, 7);
 
 // 2. askLog:false：不问，改为明确要求才建
 const b = boot({ askLog: false });
-assert.doesNotMatch(b.section.text, /先问一句/);
-assert.match(b.section.text, /只有用户明确说/);
+assert.doesNotMatch(b.section.text, /这次记日志吗/);
+assert.match(b.section.text, /只有用户明说/);
 b.cleanup();
 a.cleanup();
 

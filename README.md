@@ -66,3 +66,19 @@ node test/smoke.mjs
 ## License
 
 MIT
+
+## 确认是否生效
+
+```bash
+cat ~/.dsh/thinking-trails/state.json   # 看 version 与 appliedAt
+```
+
+系统提示里出现「## 思考路径（thinking-trail）」= 插件已加载。
+
+改完代码后同步到运行目录（`file:` 依赖是复制安装，不是软链）：
+
+```bash
+cd ~/.dsh/profiles/desktop && pnpm install
+```
+
+然后重启应用。
