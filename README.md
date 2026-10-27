@@ -20,8 +20,8 @@
 需要 Node 18+ 和一份 DSH（Cordis 插件树）。
 
 ```bash
-# 方式一：CLI（非 Electron 托管的 profile）
-dsh plugin add dsh-thinking-trail
+# 方式一：从 GitHub 直接装（尚未发布 npm，请用仓库地址）
+dsh plugin add https://github.com/2697574898-netizen/dsh-thinking-trail
 
 # 方式二：手动挂载（Electron 桌面版，profile 由应用托管）
 cd ~/.dsh/profiles/desktop
