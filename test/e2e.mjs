@@ -12,7 +12,7 @@ function boot(config) {
 	const dir = mkdtempSync(join(tmpdir(), 'trail-e2e-'));
 	const raw = new Map();
 	const sections = [];
-	apply({ systemPrompt: { section: (s) => sections.push(s) }, tools: { register: (d) => raw.set(d.name, d) } }, { dir, ...config });
+	apply({ systemPrompt: { section: (s) => sections.push(s), context: (c) => sections.push(c) }, tools: { register: (d) => raw.set(d.name, d) } }, { dir, ...config });
 	// 包一层：每次调用都按 output.schema.required 校验返回值，防止「schema 要 path 但没返回」
 	const tools = new Map();
 	for (const [name, def] of raw) {

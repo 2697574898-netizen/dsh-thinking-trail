@@ -23,17 +23,18 @@ const dir = mkdtempSync(join(tmpdir(), 'trail-'));
 const tools = new Map();
 const sections = [];
 const ctx = {
-	systemPrompt: { section: (s) => sections.push(s) },
+	systemPrompt: { section: (s) => sections.push(s), context: (c) => sections.push(c) },
 	tools: { register: (def) => tools.set(def.name, def) }
 };
 
 apply(ctx, { dir });
 
-// 1. 提示词 section
-assert.equal(sections.length, 1);
+// 1. 提示词 section + 动态语言段
+assert.equal(sections.length, 2);
 assert.ok(Number.isFinite(sections[0].order));
 assert.match(sections[0].text, /路线/);
 assert.match(sections[0].text, /#关键词/);
+assert.match(sections[1].text, /中文/);
 
 // 2. 工具 schema 过 dsh 的校验器
 assert.deepEqual(
