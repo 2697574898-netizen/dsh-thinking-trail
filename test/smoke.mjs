@@ -3,7 +3,7 @@
  * 并用 dsh 真实的 JSON Schema 校验器核对工具 schema。
  * 用法：node test/smoke.mjs
  */
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import assert from 'node:assert/strict';
@@ -29,6 +29,10 @@ const ctx = {
 	tools: { register: (def) => tools.set(def.name, def) }
 };
 
+// 能力核对扫 DSH_HOME/skills：造一个假 skill，别依赖本机装了什么（CI 上就没有 ponytail）
+process.env.DSH_HOME = dir;
+mkdirSync(join(dir, 'skills', 'ponytail'), { recursive: true });
+writeFileSync(join(dir, 'skills', 'ponytail', 'SKILL.md'), '---\nname: ponytail\ndescription: 测试用\n---\n');
 apply(ctx, { dir });
 
 // 1. 提示词 section + 动态语言段
