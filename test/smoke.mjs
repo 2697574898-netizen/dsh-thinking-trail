@@ -22,8 +22,10 @@ try {
 const dir = mkdtempSync(join(tmpdir(), 'trail-'));
 const tools = new Map();
 const sections = [];
+let langHook;
 const ctx = {
 	systemPrompt: { section: (s) => sections.push(s), context: (c) => sections.push(c) },
+	on: (name, fn) => { if (name === 'session/event') langHook = fn; },
 	tools: { register: (def) => tools.set(def.name, def) }
 };
 
@@ -34,7 +36,14 @@ assert.equal(sections.length, 2);
 assert.ok(Number.isFinite(sections[0].order));
 assert.match(sections[0].text, /路线/);
 assert.match(sections[0].text, /#关键词/);
-assert.match(sections[1].text, /中文/);
+assert.match(sections[1].text(), /中文/);
+
+// 用户改说英文后，指令跟着切
+assert.equal(typeof langHook, 'function');
+langHook({}, { type: 'user/message', data: { text: 'please fix the parser bug' } });
+assert.match(sections[1].text(), /英文/);
+langHook({}, { type: 'user/message', data: { text: '帮我修一下解析器的 bug' } });
+assert.match(sections[1].text(), /中文/);
 
 // 2. 工具 schema 过 dsh 的校验器
 assert.deepEqual(
