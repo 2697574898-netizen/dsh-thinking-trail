@@ -25,5 +25,10 @@
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WLL/dsh-thinking-trail.git"
+  },
+  "homepage": "https://github.com/WLL/dsh-thinking-trail"
 }
