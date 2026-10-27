@@ -35,7 +35,7 @@ apply(ctx, { dir });
 assert.equal(sections.length, 2);
 assert.ok(Number.isFinite(sections[0].order));
 assert.match(sections[0].text, /路线/);
-assert.match(sections[0].text, /#关键词/);
+assert.match(sections[0].text, /先查路径库/);
 assert.match(sections[1].text(), /中文/);
 
 // 用户改说英文后，指令跟着切

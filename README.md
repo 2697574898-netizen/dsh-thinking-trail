@@ -7,11 +7,11 @@
 - 零依赖：只用 Node 标准库，不 import 任何 `@deepseek-ai/*` 内部包，方便单独复制、开源、改造。
 - 七个工具，四件事：
   - **思考路径**：`record_thought` 任务收尾写一条（`goal`、`route` 必填，`decisions`/`lessons`/`tags` 可选）；`recall_thoughts` 按关键词检索，不带关键词返回最近几条。
-  - **任务日志**：`open_task_log` 建一份按任务的 md（路径 / 经验 / 不足 / 进步 / 思考路径）；`append_task_log` 往对应小节追加，建好会把**完整路径告诉你**。每次任务开始前 AI 会先问你要不要记。`record_thought` 收尾时也会顺手把路径写进当前日志。
+  - **任务日志**：`open_task_log` 建一份按任务的 md（路径 / 经验 / 不足 / 进步 / 思考路径）；`append_task_log` 往对应小节追加，建好会把**完整路径告诉你**。多步任务 AI 会直接建，不再问你。`record_thought` 收尾时也会顺手把路径写进当前日志。
   - **能力核对**：`check_capability` 列出「这次任务需要的能力 → 本机有没有」：扫已装 skill（`~/.dsh/skills`）和已装插件（profile `bundles`），缺的会明说。
   - **会话素材调度**：`link_material` 把从别的会话调来的内容登记进日志表格，**同 session_id + seq 自动判重**；`list_material` 列出已登记的，避免重复搬运。
 - 一条系统提示（order 150）：
-  - 需求精化（内部步骤，不回显）：收到需求先在心里拆成「目标 / 必须满足 / 不能碰 / 怎么算做完」，直接执行；不回显拆解、不挤牙膏式追问；一次工具调用能拿全的不分两次。用用户的语言思考；非简单任务先给路线再执行；开工前先查旧路；收尾存一条；`#关键词` 表示从旧会话调素材，先检索、由用户挑、只读确认过的、每读一条就登记去重。
+  - 需求精化（内部步骤，不回显）：收到需求先在心里拆成「目标 / 必须满足 / 不能碰 / 怎么算做完」，直接执行；不回显拆解、不挤牙膏式追问；一次工具调用能拿全的不分两次。用用户的语言思考；非简单任务先给路线再执行；接到新任务先查旧路径库、收尾存一条、多步任务自动建日志，全程不打断你；需要别处会话的内容才 `session_search`，每读一条登记去重。
 
 ## 安装（本机 DSH，已装好）
 
@@ -36,7 +36,6 @@ ln -sfn /path/to/dsh-thinking-trail ~/.dsh/profiles/desktop/node_modules/dsh-thi
   config:
     dir: /Users/you/notes/trails   # 默认 <DSH_HOME>/thinking-trails
     maxResults: 5                  # recall 默认返回条数
-    askLog: true                   # 每次任务前问要不要记日志；false = 只在你说「记日志」时建
 ```
 
 ## 改完代码怎么生效

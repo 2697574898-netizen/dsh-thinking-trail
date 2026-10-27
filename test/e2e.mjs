@@ -32,17 +32,21 @@ function boot(config) {
 	return { dir, tools, section: sections[0], cleanup: () => rmSync(dir, { recursive: true, force: true }) };
 }
 
-// 1. 默认：每次任务前问日志
+// 1. 一条龙：不问用户，自动查路径库、自动建日志
 const a = boot({});
-assert.match(a.section.text, /这次记日志吗/);
+assert.doesNotMatch(a.section.text, /记日志吗|问一句/);
+assert.match(a.section.text, /先 recall_thoughts/);
+assert.match(a.section.text, /直接 open_task_log/);
 assert.equal(a.tools.size, 7);
-
-// 2. askLog:false：不问，改为明确要求才建
-const b = boot({ askLog: false });
-assert.doesNotMatch(b.section.text, /这次记日志吗/);
-assert.match(b.section.text, /只有用户明说/);
-b.cleanup();
 a.cleanup();
+
+// 2. 脏参数清洗：标签残渣不进路径库
+const dirty = boot({});
+await dirty.tools.get('record_thought').execute({ goal: '修 bug</decisions>', route: '读<lessons>日志' });
+const stored = readFileSync(join(dirty.dir, 'trails.jsonl'), 'utf8').trim().split('\n').map((l) => JSON.parse(l)).at(-1);
+assert.equal(stored.goal, '修 bug');
+assert.equal(stored.route, '读日志');
+dirty.cleanup();
 
 // 3. 真实任务链路：建日志 → 记路径 → 路径出现在日志 → 素材去重 → 能力核对
 const t = boot({});
@@ -64,7 +68,8 @@ assert.match(dup.text, /跳过/);
 const cap = await t.tools.get('check_capability').execute({ needs: ['ponytail', 'zzz不存在zzz'] });
 assert.match(cap.text, /✅ ponytail/);
 assert.match(cap.text, /❌ zzz不存在zzz/);
-assert.match(cap.text, /已装插件/);
+assert.match(cap.text, /已装 \d+ skill/);
+assert.doesNotMatch(cap.text, /已装插件（21）/, '清单不该再怼一长串');
 
 // 4. 坏行不应弄崩检索
 writeFileSync(join(t.dir, 'trails.jsonl'), `${readFileSync(join(t.dir, 'trails.jsonl'), 'utf8')}这不是 JSON\n`);
