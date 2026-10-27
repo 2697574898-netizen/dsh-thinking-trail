@@ -1,5 +1,7 @@
 # dsh-thinking-trail
 
+> **English**: A plugin for [DeepSeek Harness](https://github.com/deepseek-ai) that keeps an AI's task trails (goal → route → decisions → lessons) in local JSONL, so the next similar task starts from a bridge instead of from scratch. Zero dependencies, MIT.
+
 给 DeepSeek Harness 用的「思考路径」插件：AI 把每个任务的**目标 → 路线 → 决策 → 教训**留在本地，下次遇到同类任务先查旧路，而不是从零找路。
 
 - 跨会话：路径存在 `~/.dsh/thinking-trails/*.jsonl`，不同对话共享同一份。
@@ -13,19 +15,23 @@
 - 一条系统提示（order 150）：
   - 需求精化（内部步骤，不回显）：收到需求先在心里拆成「目标 / 必须满足 / 不能碰 / 怎么算做完」，直接执行；不回显拆解、不挤牙膏式追问；一次工具调用能拿全的不分两次。用用户的语言思考；非简单任务先给路线再执行；接到新任务先查旧路径库、收尾存一条、多步任务自动建日志，全程不打断你；需要别处会话的内容才 `session_search`，每读一条登记去重。
 
-## 安装（本机 DSH，已装好）
+## 安装
+
+需要 Node 18+ 和一份 DSH（Cordis 插件树）。
 
 ```bash
-# 1. 链到 profile 的 node_modules
-ln -sfn /path/to/dsh-thinking-trail ~/.dsh/profiles/desktop/node_modules/dsh-thinking-trail
+# 方式一：CLI（非 Electron 托管的 profile）
+dsh plugin add dsh-thinking-trail
 
-# 2. 把包名追加到 ~/.dsh/profiles/desktop/package.json 的 dsh.profile.bundles
-#    "bundles": [ ..., "dsh-thinking-trail" ]
-
-# 3. 重载窗口（client 侧改动）/ 重启应用（host 侧首次加载）
+# 方式二：手动挂载（Electron 桌面版，profile 由应用托管）
+cd ~/.dsh/profiles/desktop
+pnpm add file:/path/to/dsh-thinking-trail     # 或从 git/npm 装
+# 再把 "dsh-thinking-trail" 加进该 profile package.json 的 dsh.profile.bundles
 ```
 
-卸载：从 `bundles` 删掉包名，删除软链即可；已记录的路径文件不会被删。
+装好后重启应用：`~/.dsh/thinking-trails/state.json` 出现即表示已加载；加载失败会写同级 `apply-error.txt`。
+
+卸载：从 `bundles` 删掉包名并移除依赖即可，已记录的路径和日志不会被删。
 
 ## 配置
 
