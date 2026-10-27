@@ -2,11 +2,17 @@
  * e2e：不重启 DSH，模拟真实任务从开始到收尾的完整链路。
  * 用法：node test/e2e.mjs
  */
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import assert from 'node:assert/strict';
 import { apply } from '../lib/index.js';
+
+// 能力核对扫 DSH_HOME：指向临时目录并造个假 skill，别依赖本机装了什么（CI 上没有 ponytail）
+const testHome = mkdtempSync(join(tmpdir(), 'trail-home-'));
+process.env.DSH_HOME = testHome;
+mkdirSync(join(testHome, 'skills', 'ponytail'), { recursive: true });
+writeFileSync(join(testHome, 'skills', 'ponytail', 'SKILL.md'), '---\nname: ponytail\ndescription: 测试用\n---\n');
 
 let langHook;
 
