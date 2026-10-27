@@ -1,6 +1,6 @@
 {
   "name": "dsh-thinking-trail",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "思考路径留存与复用：跨会话记录 AI 的路线、决策和教训，下次同类任务先查桥。",
   "type": "module",
   "license": "MIT",
